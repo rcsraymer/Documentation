@@ -311,3 +311,179 @@ class App extends Component {
 
 ReactDOM.render(<App />, document.getElementById('app'));
 ```
+# 3 - Redux & HTTP
+Install Redux DevTools for Chrome
+
+```console
+(Dev-JlwXeuLe) C:\Dev\django-react> npm i redux react-redux redux-thunk redux-devtools-extension axios
+(Dev-JlwXeuLe) C:\Dev\django-react> npm run dev
+```
+
+leadmanager/frontend/src -> create store.js
+```javascript
+import { createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import thunk from redux-thunk;
+import rootReducer from './reducers';
+
+const initialState = {};
+
+const middleware = [thunk];
+
+const store = createStore(
+    rootReducer,
+    initialState,
+    composeWithDevTools(applyMiddleware(...middleware))
+);
+
+export default store;
+```
+
+in src, create a folder reducers and then create _index.js_ in /reducers
+
+```javascript
+import { combineReducers } from 'redux';
+
+export default combineReducers({
+
+});
+```
+
+in App.js:
+
+```javascript
+import { Provider } from 'react-redux';
+import store from '../store';
+
+class App extends Component {
+    render() {
+        return (
+            <Provider store={store}>
+                <Fragment>
+                    <Header />
+                    <div className="container">
+                        <Dashboard />
+                    </div>
+                </Fragment>
+            </Provider>
+        )
+    }
+}
+
+ReactDOM.render(<App />, document.getElementById('app'));
+```
+
+Reload server, check Redux info in Chrome plugin.
+  
+Diff - Create an action, like submitting a form, or anything that changes the state will be listed in Diff.
+  
+in reducers/index.js:
+```javascript
+import { combineReducers } from "redux";
+import leads from './leads';
+
+export default combineReducers({
+    leads
+});
+```
+A reducer is a function that evaluates an action and sends down a certain state depending on what that action does. Get lead, add lead, delete lead, etc
+  
+In reducers, create leads.js. 
+  
+```javascript
+import { GET_LEADS } from '../actions/types.js';
+
+const initialState = {
+    leads: []
+}
+
+export default function(state = initialState, action) {
+    switch(action.type) {
+        case GET_LEADS:
+            return {
+                ...state,
+                leads: action.payload
+            }
+        default:
+            return state;
+    }
+}
+```
+
+in src, create actions folder and then types.js:
+```javascript
+export const GET_LEADS = "GET_LEADS";
+```
+
+in actions, create leads.js:
+```javascript
+import axios from 'axios';
+import { GET_LEADS } from './types';
+
+// GET LEADS
+export const getLeads = () => dispatch => {
+    axios.get('/api/leads/')
+        .then(res => {
+            dispatch({
+                type: GET_LEADS,
+                payload: res.data
+            });
+        }).catch(err => console.log(err));
+}
+```
+in _leads/Leads.js_:
+```javascript
+import  React, { Component } from "react";
+import { connect } from 'react-dredux';
+import PropTypes from 'prop-types';
+import { getLeads } from '../../actions/leads';
+
+export class Leads extends Component {
+    static PropTypes = {
+        leads: PropTypes.array.isRequired
+
+    }
+
+    componentDidMount() {
+        this.props.getLeads();
+    }
+
+    render() {
+        return (
+            <Fragment>
+                <h2>Leads</h2>
+                <table className="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Message</th>
+                        <th />
+                    </tr>
+                    </thead>
+                    <tbody>
+                        { this.props.leads.map(lead => (
+                            <tr key={lead.id}>
+                                <td>{lead.id}</td>
+                                <td>{lead.name}</td>
+                                <td>{lead.email}</td>
+                                <td>{lead.message}</td>
+                                <td><button className="btn btn-danger btn-sm">Delete</button></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Fragment>
+        );
+    }
+}
+
+const mapStateToProps = state => ({
+    leads: state.leads.leads
+});
+
+export default connect(mapStateToProps)(Leads);
+```
+
+@29:38 adding DELETE_LEAD functionality
