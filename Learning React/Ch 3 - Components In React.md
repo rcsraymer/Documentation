@@ -138,3 +138,82 @@ ReactDOM.render(
   document.querySelector("#container")
 );
 ```
+We wrapped our call to the HelloWorld component inside a div element, and if you preview this in your browser, everything still works. You can also make multiple calls to HelloWorld within the div.  
+  
+If we change the text returned in the HelloWorld component declaration to the more traditional Hello, world! value, we can see that reflected in the browser.
+```javascript
+class HelloWorld extends React.Component {
+    render() {
+        return <p>Hello, world!</p>
+    }
+}
+```
+
+# Specifying Properties
+As with functions, you can pass in arguments that alter what your components do. What we call arguments in the functions world are called properties in the component world. 
+  
+To add properties to a component, you need to follow two parts of instructions:
+
+## Updating the Component Definition
+Right now, our HelloWorld component is hard-coded to always send out Hello, world! as part of its return value. We first need to change that behavior by having the return statement print out the value passed in by a property. We need a name to give our property; for this example, we call our property greetTarget.
+
+To specify the value of greetTarget as part of our component, we need to make this modification:
+```html
+class HelloWorld extends React.Component {
+  render() {
+    return <p>Hello, {this.props.greetTarget}!</p>
+  }
+}
+```
+You access a property by referencing it via the this.props property that every component has access to. In JSX, if you want something to get evaluated as an expression, you need to wrap that something inside curly brackets.
+
+## Modifying the Component Call
+We now need to pass in the property value as part of the component call. In our example, this involves modifying the HelloWorld call with the greenText attribute. Modify the HelloWorld calls as follows:
+```html
+ReactDOM.render(
+  <div>
+    <HelloWorld greetTarget="Batman"/>
+    <HelloWorld greetTarget="Iron Man"/>
+    <HelloWorld greetTarget="Nicolas Cage"/>
+    <HelloWorld greetTarget="Mega Man"/>
+    <HelloWorld greetTarget="Bono"/>
+    <HelloWorld greetTarget="Catwoman"/>
+  </div>,
+  document.querySelector("#container")
+);
+```
+# Dealing With Children
+Just as you can have many HTML elements, your components can have children.
+
+```html
+<CleverComponent foo="bar">
+  <p>Something!</p>
+</CleverComponent>
+```
+Here you have a component very cleverly called CleverComponent, and it has a p element as a child. From within CleverComponent, you have the capability to access the p child element (and any children it has) via the children property accessed by this.props.children.
+
+To make sense of all this, let’s look at another really simple example. This time around, we have a component called Buttonify that wraps its children inside a button. The component looks like this:
+
+```html
+class Buttonify extends React.Component {
+  render() {
+    return(
+      <div>
+        <button type={this.props.behavior}>{this.props.children}</button>
+      </div>
+    );
+  }
+}
+```
+You can use this component by calling it via the ReactDOM.render method, as shown here:
+```html
+ReactDOM.render(
+  <div>
+    <Buttonify behavior="submit">SEND DATA</Buttonify>
+  </div>,
+  document.querySelector("#container")
+);
+```
+Getting back to the JSX, notice that we specify a custom property called behavior. This property allows us to specify the button element’s type attribute, and you can see us accessing it via this.props.behavior in the component definition’s render method.
+
+There’s more to accessing a component’s children than what you’ve seen here. For example, if your child element is just some text, the this.props.children property returns a string. If your child element is just a single element (as in our example), the this.props.children property returns a single component that is not wrapped inside an array.
