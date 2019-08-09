@@ -14,11 +14,17 @@
   <script type="text/babel">
         class HelloWorld extends React.Component {
             render() {
-                return <p>Hello, componentized world!</p>
+                return <p>Hello, {this.props.greetTarget}!</p>
             }
         }
+
         ReactDOM.render(
-            <HelloWorld/>,
+          <div>
+            <HelloWorld greetTarget="Batman"/>
+            <HelloWorld greetTarget="Iron Man"/>
+            <HelloWorld greetTarget="Megaman"/>
+            <HelloWorld greetTarget="Nicolas Cage"/>
+          </div>,
             document.querySelector("#container")
         );
   </script>
