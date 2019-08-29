@@ -145,7 +145,7 @@ render() {
   var squareStyle = {
     backgroundColor: this.state.bgColor
   };
- 
+  // new line below
   var self = this;
  
   return (
