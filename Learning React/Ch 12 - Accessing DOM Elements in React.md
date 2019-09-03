@@ -206,3 +206,54 @@ Using arrow functions, we can simplify it down to the following:
          }>
  </input>
 ```
+
+## Using Portals
+
+You need to be aware of one more DOM-related trick. So far, we’ve been dealing with HTML only in the context of what our JSX generates, either from a single component or combined through many components. This means we’re limited by the DOM hierarchy our parent components impose on us. Having arbitrary access to any DOM element anywhere on the page doesn’t seem possible. Or is it? As it turns out, you can choose to render your JSX to any DOM element anywhere on the page; you aren’t limited to just sending your JSX to a parent component. The magic behind this wizardry is a feature known as portals.
+
+The way we use a portal is very similar to what we do with our ReactDOM.render method. We specify the JSX we want to render, and we specify the DOM element we want to render to. To see all of this in action, go back to our example and add the following h1 element as a sibling just above where we have our container div element defined:
+
+```html
+<body>
+ 
+  <h1 id="colorHeading">Colorizer</h1>
+ 
+  <div id="container"></div>
+```
+
+Next add the following within our style tag:
+
+```html
+#colorHeading {
+  padding: 0;
+  margin: 50px;
+  margin-bottom: -20px;
+  font-family: sans-serif;
+}
+```
+We want to change the value of our h1 element to display the name of the color we are currently previewing. The point to emphasize is that our h1 element is a sibling of the container div element where our app is set to render into.
+
+To accomplish what we’re trying to do, go back to our Colorizer component’s render method and add the following highlighted line to the return statement, after the form onSubmit element:
+
+```javascript
+    <ColorLabel color={this.state.bgColor}/>
+```
+
+Here we’re instantiating a component called ColorLabel and declaring a prop called color with its value set to our bgColor state property. We haven’t created this component yet, so to fix that, add the following lines just above where we have our ReactDOM.render call:
+
+```javascript
+var heading = document.querySelector("#colorHeading");
+ 
+class ColorLabel extends React.Component {
+  render() {
+    return ReactDOM.createPortal(
+      ": " + this.props.color,
+      heading
+    );
+  }
+}
+```
+We are referencing our h1 element with the heading variable. That’s old stuff. For the new stuff, take a look at our ColorLabel component’s render method. More specifically, notice what our return statement looks like. We are returning the result of calling ReactDOM.createPortal():. The ReactDOM.createPortal() method takes two arguments: the JSX to print and the DOM element to print that JSX to. The JSX we are printing is just some formatting characters and the color value we passed in as a prop. The DOM element we are printing all of this to is our h1 element referenced by the heading variable.
+
+
+
