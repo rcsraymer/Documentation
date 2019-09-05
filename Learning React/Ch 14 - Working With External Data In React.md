@@ -123,14 +123,19 @@ class IPAddressContainer extends Component {
  
     this.processRequest = this.processRequest.bind(this);
   }
+
+// When our component becomes active and the component-DidMount lifecycle method gets called, we make our HTTP request and send it off to the ipinfo.io web service:
+
   componentDidMount() {
     xhr = new XMLHttpRequest();
-    xhr.open("GET", "https://ipinfo.io/json", true);
+    xhr.open("GET", "https://ipinfo.io/json?token=2277ce4bac0347", true);
     xhr.send();
  
     xhr.addEventListener("readystatechange", this.processRequest, false);
   }
- 
+
+/// When we hear a response back from the ipinfo service, we call the processRequest function to help us deal with the result:
+
   processRequest() {
     if (xhr.readyState === 4 && xhr.status === 200) {
       var response = JSON.parse(xhr.responseText);
@@ -140,7 +145,7 @@ class IPAddressContainer extends Component {
       });
     }
   }
- 
+
   render() {
     return (
       <div>Nothing yet!</div>
@@ -149,4 +154,96 @@ class IPAddressContainer extends Component {
 };
 ```
 
-Now we’re getting somewhere! When our component becomes active and the component-DidMount lifecycle method gets called, we make our HTTP request and send it off to the ipinfo.io web service
+Next, modify the render call to reference the IP address value stored by our state:
+
+```javascript
+render() {
+    return (
+      <div>{this.state.ip_address}</div>
+    );
+  }
+```
+
+## Kicking the Visuals Up a Notch
+We created a component that handles all the HTTP requesting shenanigans, and we know that it returns the IP address when called. Now we’re going to format the output a bit so that it doesn’t look as plain as it does now.
+
+To do that, we won’t add HTML elements and styling-related details to our IPAddressContainer component’s render method. Instead, we’ll create a new component whose only purpose will be to deal with all of that.
+
+Add a new file called IPAddress.js in your src folder. Then edit it by adding the following content into it:
+
+```javascript
+import React, { Component } from "react";
+ 
+class IPAddress extends Component {
+  render() {
+    return (
+      <div>
+        Blah!
+      </div>
+    );
+  }
+}
+ 
+export default IPAddress;
+```
+
+Here we’re defining a new component called IPAddress that will be responsible for displaying the additional text and ensuring that our IP address is visually formatted exactly the way we want. It doesn’t do much right now, but that will change really quickly.
+
+We first want to modify this component’s render method to look as follows:
+
+```javascript
+    return (
+      <div>
+        <h1>{this.props.ip}</h1>
+        <p>( This is your IP address...probably :P )</p>
+      </div>
+    );
+  }
+}
+```
+The highlighted changes should be self-explanatory. We’re putting the results of a prop value called ip inside an h1 tag, and we’re displaying some additional text using a p tag. Besides making the rendered HTML a bit more semantic, these changes ensure that we can style them better.
+
+To get these elements styled, add a new CSS file to the src folder called IPAddress.css. Inside this file, add the following style rules:
+
+```css
+h1 {
+  font-family: sans-serif;
+  text-align: center;
+  padding-top: 140px;
+  font-size: 60px;
+  margin: -15px;
+}
+p {
+  font-family: sans-serif;
+  color: #907400;
+  text-align: center;
+}
+```
+
+Add the following highlighted line to IPAddress.js:
+
+```javascript
+import "./IPAddress.css";
+```
+
+All that remains is to use our IPAddress component and pass in the IP address. The first step is to ensure that the IPAddressContainer component is aware of the IPAddress component by referencing it. At the top of IPAddressContainer.js, add the following highlighted line:
+
+```javascript
+import IPAddress from "./IPAddress";
+```
+
+The second (and last!) step is to modify the render method as follows:
+
+```javascript
+class IPAddressContainer extends Component {
+    .
+    .
+    .
+  render() {
+    return (
+      <IPAddress ip={this.state.ip_address}/>
+    );
+  }
+}
+```
+
