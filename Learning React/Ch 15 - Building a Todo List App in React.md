@@ -294,3 +294,120 @@ import "./TodoList.css";
 ```
 
 ## Removing Items
+
+What we can’t do is remove items after they’ve been added. We’re going to allow users to remove items by clicking on them directly. This seems straightforward to implement, right? The only thing to watch out for involves where to put all our code. The items we click on are defined in TodoItems.js. The actual logic for populating the items lives in our state object in TodoList.js. To give you a preview of what to expect, we will be partaking in some shenanigans as we pass things between both of those components.
+
+First we need to set up the event handler for dealing with the click event. Change the return statement under createTasks to look as follows:
+
+```javascript
+createTasks(item) {
+  return <li onClick={() => this.delete(item.key)}
+             key={item.key}>{item.text}</li>
+}
+```
+We’re simply listening to the click event and associating it with an event handler called delete. What might be new is our approach for passing arguments to the event handler. Because of how event arguments and event handlers deal with scope, we work around all those issues using an arrow function that allows us both to maintain the default event argument and pass in our own arguments. After you’ve made this change, you need to define the delete event handler. Make the following changes:
+
+```javascript
+class TodoItems extends Component {
+    constructor(props) {
+        super(props);
+
+        this.createTasks = this.createTasks.bind(this);
+    }
+
+    delete(key) {
+        this.props.delete(key);
+    }
+```
+Here we define a function called delete that takes our argument for the item key. To ensure that this resolves properly, we explicitly bind this in the constructor. Notice that our delete function doesn’t actually do any deleting. It just calls another delete function passed into this component via props. We’ll work backward from here and deal with that next.
+
+In TodoList.js, take a look at our render function. When calling TodoItems, let’s specify a prop called delete and set it to the value of a function called deleteItem:
+
+```javascript
+      </div>
+      <TodoItems entries={this.state.items}
+                 delete={this.deleteItem}/>
+    </div>
+  );
+```
+
+This change ensures that our TodoItems component now has knowledge of a prop called delete. This also means that our delete function we added in TodoList actually connects. All that remains is actually defining our deleteItem function so that it can deal with deleting an item.
+
+First, go ahead and add the deleteItem function to your TodoList component. You can add it anywhere, but my preference is to put it just below where our addItem function lives:
+
+```javascript
+deleteItem(key) {
+  var filteredItems = this.state.items.filter(function(item) {
+    return (item.key !== key);
+  });
+ 
+  this.setState({
+    items: filteredItems
+  });
+}
+```
+
+We are passing the key from our clicked item all the way here, and we check this key against all the items we’re storing currently via the filter method. We create a new array called filteredItems that contains everything except the item we are removing. This filtered array is then set as our new items property on our state object.
+
+The last thing we need to do is deal with the usual shenanigans surrounding this. Make the following change in the constructor:
+
+```javascript
+constructor(props) {
+  super(props);
+ 
+  this.state = {
+    items: []
+  };
+ 
+  this.addItem = this.addItem.bind(this);
+  this.deleteItem = this.deleteItem.bind(this);
+}
+```
+
+This ensures that all references to this inside deleteItem will reference the correct thing. Now we have just one more thing to do before we can declare victory in deleting items. Open TodoList.css and make the following highlighted change and style rule addition:
+
+```css
+.todoListMain .theList li {
+  color: #333;
+  background-color: rgba(255,255,255,.5);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+ 
+  transition: background-color .2s ease-out;
+}
+ 
+.todoListMain .theList li:hover {
+  background-color: pink;
+  cursor: pointer;
+}
+```
+
+This provides the hover effect when you move the mouse cursor over the item that you want to remove. With this change done, our functionality to remove an item should be complete. 
+
+## Animation
+The React community has come up with a handful of lightweight animation libraries that make animating adding and deleting elements really easy. One such library is Flip Move. Among many things, this library makes animating the addition and removal of list elements simple.
+
+To use this library, we need to first add it to our project. From the command line, make sure you are still in the same location as our todolist project and run the following command:
+
+```console
+npm i -S react-flip-move
+```
+
+After you’ve done this, in TodoItems.js, add the following import statement at the top:
+
+```javascript
+import FlipMove from 'react-flip-move';
+```
+
+Now all that’s left is to tell our FlipMove component to animate our list of items. In our render function, make the following highlighted change:
+
+```javascript
+  return (
+    <ul className="theList">
+      <FlipMove duration={250} easing="ease-out">
+        {listItems}
+      </FlipMove>
+    </ul>
+  );
+```
