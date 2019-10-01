@@ -102,3 +102,246 @@ The render call here is responsible for displaying the output of our MenuContain
 
 Next we’re going to create the index.css file in our src folder:
 
+```css
+body {
+  background-color: #EEE;
+  font-family: sans-serif;
+  font-size: 20px;
+  padding: 25px;
+  margin: 0;
+  overflow: auto;
+}
+ 
+#container li {
+  margin-bottom: 10px;
+}
+```
+
+The last thing we do to get our initial app set up is create our MenuContainer component. Create a file called MenuContainer.js in the src folder and add the following JS and JSX into it:
+
+```javascript
+import React, { Component } from "react";
+ 
+class MenuContainer extends Component {
+  render() {
+    return (
+      <div>
+        <div>
+          <p>Can you spot the item that doesn't belong?</p>
+          <ul>
+            <li>Lorem</li>
+            <li>Ipsum</li>
+            <li>Dolor</li>
+            <li>Sit</li>
+            <li>Bumblebees</li>
+            <li>Aenean</li>
+            <li>Consectetur</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+}
+ 
+export default MenuContainer;
+```
+
+## Showing and Hiding the Menu
+Our menu is shown or hidden as follows:
+
+1) When you click a button, the menu slides into view
+2) When you click anywhere on the menu, the menu slides out of view
+
+We need to maintain some state to keep track of whether the menu is hidden or shown. This state needs to be something we update from both the button and the menu because clicking on either will toggle whether the menu is visible. We need our state to live in a common location that both the menu and the button can access. That common location will be inside our MenuContainer component, so let’s add the code relating to our state logic.
+
+In the MenuContainer.js file, add the constructor and toggleMenu methods just above our render method:
+
+```javascript
+constructor(props) {
+  super(props);
+
+  this.state = {
+    /// You’re storing a variable called visible in your state object
+    visible: false
+  };
+  
+  this.toggleMenu = this.toggleMenu.bind(this);
+}
+/// You’re creating a method called toggleMenu that will be responsible for toggling whether visible is true or false
+toggleMenu() {
+  this.setState({
+    visible: !this.state.visible
+  });
+}
+```
+
+Next up is dealing with the click events on the button and menu. If the goal is to update our state from inside our MenuContainer component, we need to place our event handler inside MenuContainer as well. Go ahead and add the following lines:
+
+```javascript
+    this.state = {
+      visible: false
+    };
+
+    /// Add the following block
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.toggleMenu = this.toggleMenu.bind(this);
+  }
+
+   handleMouseDown(e) {
+    this.toggleMenu();
+
+    console.log("clicked");
+    e.stopPropagation();
+  } 
+
+  toggleMenu() {...
+```
+
+When the handleMouseDown method is called, we call toggleMenu, which toggles whether the menu appears. At this point, you’re probably wondering where the actual code for dealing with a click event is. What exactly will trigger a call to handleMouseDown? The answer is, nothing so far! We’ve done things in a bit of a reverse order and defined our event handler first. We handle the association between our event handler and our click event in a few moments when dealing with our button and menu components.
+
+## Creating the Button
+In your src folder, create two files called MenuButton.js and MenuButton.css. Open the js file:
+
+```javascript
+import React, { Component } from "react";
+import './MenuButton.css';
+ 
+class MenuButton extends Component {
+  render() {
+    return (
+      <button id="roundButton"
+              onMouseDown={this.props.handleMouseDown}></button>
+    );
+  }
+}
+ 
+export default MenuButton;
+```
+We define a button element called roundButton, and we associate the onMouseDown event with a prop we are referencing as handleMouseDown. Before moving on, open MenuButton.css and add the following style rules:
+
+```css
+#roundButton {
+  background-color: #96D9FF;
+  margin-bottom: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 10px solid #0065A6;
+  outline: none;
+  transition: all .2s cubic-bezier(0, 1.26, .8, 1.28);
+}
+ 
+#roundButton:hover {
+  background-color: #96D9FF;
+  cursor: pointer;
+  border-color: #003557;
+  transform: scale(1.2, 1.2);
+}
+ 
+#roundButton:active {
+  border-color: #003557;
+  background-color: #FFF;
+}
+```
+
+Now we instantiate our MenuButton component. Go back to the MenuContainer component and add the following line inside the render method:
+
+```javascript
+  return (
+    <div>
+      <MenuButton handleMouseDown={this.handleMouseDown}/>
+    ...
+```
+Notice that we are passing in a prop called handleMouseDown, and its value is the handleMouseDown event handler that we defined earlier. This ensures that when you click the button inside the MenuButton component, the handleMouseDown method that lives in the MenuContainer component gets called. All of this is great, but our button isn’t very useful without a menu to help slide into view. We’ll fix that next.
+
+# Creating the Menu
+It’s time to create our Menu component that will be responsible for all things dealing with the menu. Before we actually create this component, let’s pretend that it already exists and call it from our render method inside our MenuContainer. Add the following call to our (currently imaginary) Menu component just below where you added the call to MenuButton a few short moments earlier:
+
+```javascript  
+
+  toggleMenu() {
+    this.setState(
+      {
+        visible: !this.state.visible
+      }
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <MenuButton handleMouseDown={this.handleMouseDown}/>
+        <Menu handleMouseDown={this.handleMouseDown}
+              menuVisibility={this.state.visible}/>
+```
+Add the import statement for Menu.js as well. Getting back to the Menu component, look at the props you’re passing in. The first prop should look familiar to you. It is handleMouseDown and its value is our handleMouseDown event-handling method. The second prop is called menuVisibility. Its value is the current value of our visible state property. Now let’s go ahead and actually create our Menu component and see, among other things, how these props get used.
+
+In the same src folder we have been partying in for the past few sections, add one file called Menu.js and another file called Menu.css. Inside Menu.js, add the following contents:
+
+```javascript
+import React, { Component } from "react";
+import "./Menu.css";
+ 
+class Menu extends Component {
+  render() {
+/// The value of visibility is set early. The value is either hide or show, depending on whether the menuVisibility prop (whose value is specified by our visible state property) is true or false. 
+    var visibility = "hide";
+ 
+    if (this.props.menuVisibility) {
+      visibility = "show";
+    }
+ 
+    return (
+/// We have a div element called flyoutMenu with some sample content. In our div element, we call our handleMouseDown event-handling method (passed in via a prop) when the onMouseDown event is overheard. Next, we set a class value on this element; the value is the result of evaluating a variable called visibility. As you might recall, class is a reserved name in JavaScript and you can’t use it directly in our JSX; it has to be specified as className.
+      <div id="flyoutMenu"
+           onMouseDown={this.props.handleMouseDown}
+           className={visibility}>
+        <h2><a href="#">Home</a></h2>
+        <h2><a href="#">About</a></h2>
+        <h2><a href="#">Contact</a></h2>
+        <h2><a href="#">Search</a></h2>
+      </div>
+    );
+  }
+}
+ 
+export default Menu;
+```
+
+While it might not look like it, the code revolving around className plays a really important role in determining whether your menu is actually visible. When we look at our CSS, you’ll see why. Now open Menu.css and add the following style rules into it:
+
+```css
+#flyoutMenu {
+  width: 100vw;
+  height: 100vh;
+  background-color: #FFE600;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: transform .3s
+              cubic-bezier(0, .52, 0, 1);
+  overflow: scroll;
+  z-index: 1000;
+}
+ 
+#flyoutMenu.hide {
+  transform: translate3d(-100vw, 0, 0);
+}
+ 
+#flyoutMenu.show {
+  transform: translate3d(0vw, 0, 0);
+  overflow: hidden;
+}
+ 
+#flyoutMenu h2 a {
+  color: #333;
+  margin-left: 15px;
+  text-decoration: none;
+}
+ 
+#flyoutMenu h2 a:hover {
+  text-decoration: underline;
+}
+```
+
+The CSS you see here mostly deals with how our menu itself looks, but the actual showing and hiding of the menu is handled by the #flyoutMenu.hide and #flyoutMenu.show style rules. Which of these style rules becomes active depends entirely on the code we looked at earlier. In our flyoutMenu div element, remember that the class value on the generated HTML (which our CSS maps to) will be either hide or show, depending on what value we set for className.
