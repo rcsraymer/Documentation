@@ -1,14 +1,19 @@
-Prerequisites
+# Prerequisites
 The prerequisites require recent versions of Tidal and SuperDirt:
 
-Upgrade to the latest Tidal (this post assumes version 0.9.10 or greater)
-Make sure you have the latest SuperDirt quark. Uninstalling and reinstalling the SuperDirt quark might be easiest. See [1](github.com/supercollider-quarks/quarks) for details on how to update Quarks.
-Usage
+1) Upgrade to the latest Tidal (this post assumes version 0.9.10 or greater)
+2) Make sure you have the latest SuperDirt quark. Uninstalling and reinstalling the SuperDirt quark might be easiest. See [1](github.com/supercollider-quarks/quarks) for details on how to update Quarks.
+
+# Usage
 To begin, you'll start in SuperCollider. Start up SuperDirt as you normally would. Then, in SuperCollider eval the following code:
 
+```console
 MIDIClient.init;
+```
+
 You should now see a list of the system MIDI devices in SuperCollider's post window. The output will look something like this:
 
+```console
 MIDI Sources:
 	MIDIEndPoint("LoopBe Internal MIDI", "LoopBe Internal MIDI")
 	MIDIEndPoint("Focusrite USB MIDI", "Focusrite USB MIDI")
@@ -16,6 +21,7 @@ MIDI Destinations:
 	MIDIEndPoint("Microsoft GS Wavetable Synth", "Microsoft GS Wavetable Synth")
 	MIDIEndPoint("LoopBe Internal MIDI", "LoopBe Internal MIDI")
 	MIDIEndPoint("Focusrite USB MIDI", "Focusrite USB MIDI")
+```
 Take note that these MIDI devices have two parts to their names. You will need both parts in the next step, which is to actually connect to the MIDI device. Eval the following line:
 
 ~midiOut = MIDIOut.newByName("Focusrite USB MIDI", "Focusrite USB MIDI"); // substitute your own device here
