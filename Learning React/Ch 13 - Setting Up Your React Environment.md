@@ -15,7 +15,7 @@ npm install -g create-react-app
 Once your installation has completed, it’s time to create our new React project. Navigate to the folder where you want to create your new project—this can be your desktop, a location under Documents, and so on. When you’ve navigated to a folder in your command line, enter the following to create a new project at this location:
 
 ```console
-create-react-app helloworld
+npx create-react-app helloworld
 ```
 
 Navigate to your app and run the following to test your app:
