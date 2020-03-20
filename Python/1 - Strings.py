@@ -1,5 +1,3 @@
-
-
 StringA = 'PYTHON'
 StringB = 'GMT_FEB_TDS.csv'
 StringC = 'this is a sentence'
